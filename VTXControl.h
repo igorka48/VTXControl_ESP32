@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <SoftwareSerialWithHalfDuplex.h>
+#include "SoftwareSerialAdapter.h"
 #include "VTX_SmartAudio.h"
 #include "VTX_Tramp.h"
 #ifndef VTXControl_h
 #define VTXControl_h
 //--------------------------
-//#define VTXCDEBUG 1 //Uncomment this define to see the diagnostics
+#define VTXCDEBUG 1 //Uncomment this define to see the diagnostics
 //--------------------------
 #if VTXCDEBUG
 #define DEBUG(x) Serial.println(x)
@@ -69,16 +69,17 @@ public:
   bool getPitMode() { return pitMode; }
   bool sa_readResponse();
   void clearErrors();
-  VTXErrors getErrors();
+  int getErrors();
+  uint16_t getChannelFrequency(int chIndex);
   long getSpeed();
 #if VTXCDEBUG
   bool testSMAWrite();
   bool testSMAResponseFromSerial1();
 #endif
 private:
-  SoftwareSerialWithHalfDuplex* port;
+  SoftwareSerialAdapter* port;
   int vtx_mode = VTXMode::SmartAudio;//default
-  VTXErrors errors = VTXErrors::vtxNoErrors;
+  int errors = VTXErrors::vtxNoErrors;
   long sa_offerNewSpeed(long currentSpeed);//tries to offer other baud rate to work with vtx
   void setError(VTXErrors error);
   ProtocolVersion sa_protocol_version;//smart audio protocol version
@@ -92,7 +93,6 @@ private:
   
   //some utility functions  
   int getChannelIndex(uint16_t freq);
-  uint16_t getChannelFrequency(int chIndex);
   int getPowerIndexFromMW(uint16_t pwrInmW);
   int getPowerIndexFromDbm(uint16_t pwrInDbm);
   int getPowerIndexFromV1(uint16_t pwrValue);
