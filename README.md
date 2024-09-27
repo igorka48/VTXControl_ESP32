@@ -1,3 +1,9 @@
+This is an ESP32 fork of RandyReover's VTXControl library.
+
+The ESP32 SoftwareSerial libraries are different from AVR ones, so to minimize the amount of intrusive changes, the SoftwareSerialAdapter class was introduced.
+
+Some minor issues in VTXControl have been addressed as well.
+
 # VTXControl
 Arduino library providing video transmitter (VTX) control by SmartAudio/Tramp protocol.
 
