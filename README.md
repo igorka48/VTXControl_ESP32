@@ -1,42 +1,66 @@
-This is an ESP32 fork of RandyReover's VTXControl library.
+Це **PlatformIO-сумісний форк** ESP32-порту бібліотеки **VTXControl** від EY3G0R3,  
+яка, у свою чергу, є форком оригінальної бібліотеки VTXControl від RandyReover.
 
-The ESP32 SoftwareSerial libraries are different from AVR ones, so to minimize the amount of intrusive changes, the SoftwareSerialAdapter class was introduced.
-
-Some minor issues in VTXControl have been addressed as well.
+Оскільки бібліотеки **SoftwareSerial** для ESP32 відрізняються від AVR-версій,  
+клас `SoftwareSerialAdapter` збережено, щоб мінімізувати інвазивні зміни.
 
 # VTXControl
-Arduino library providing video transmitter (VTX) control by SmartAudio/Tramp protocol.
+Arduino-бібліотека для керування відеопередавачем (VTX) за протоколами **SmartAudio** та **Tramp**.
 
-This C/C++ code uses modified SoftwareSerialWithHalfDuplex library (part code taken from CustomSoftwareSerial to support different configuration of serial port (especially 8N2)), some code taken from BetaFlight and ArduPilot (SmartAudio and Tramp protocols support) code.
+Цей C/C++‑код використовує модифіковану бібліотеку **SoftwareSerialWithHalfDuplex**  
+(частково взято з CustomSoftwareSerial для підтримки різних конфігурацій UART, зокрема 8N2).  
+Деякі фрагменти запозичені з **BetaFlight** та **ArduPilot** (підтримка протоколів SmartAudio і Tramp).
 
-This code created to use features of Tramp/SmartAudio on VTX (like switching power modes and channels/frequencies) by code/wire on Arduino driven systems or robots.
+Бібліотека дозволяє керувати функціями VTX (перемикання потужності та каналів/частот)  
+програмно через Arduino‑сумісні системи або роботів.
 
-VTXControl works in two modes/protocols - SmartAudio and Tramp, communications with VTX established by software serial port (SoftwareSerialWithHalfDuplex).
+VTXControl працює в одному з двох режимів — **SmartAudio** чи **Tramp**.  
+Обмін із VTX ведеться через програмний послідовний порт (*SoftwareSerialWithHalfDuplex*).
 
-This code had been tested on Eachine TX5258 (SmartAudio v2 protocol) and JHEMCU RuiBet Tran3016W (Tramp protocol) VTXes, so that's not an universal solution for your own VTX (just because your VTX can have manufacturer's own Tramp/SmartAudio protocol implementation).
+Бібліотеку протестовано з такими передавачами:
 
-This code doesn't support PitMode and GetTemperature features, but you can add these features on your own.
+* **Eachine TX5258** (SmartAudio v2)  
+* **JHEMCU RuiBet Tran3016W** (Tramp)
 
-Please review **powers** and **freqs** arrays definitions in VTXControl.cpp to apply/modify values provided by your VTX.
+Тому це не універсальне рішення — ваш VTX може мати власну реалізацію протоколу.
 
-A simplest creation of VTXControl instance example:
+> **Підтримка PitMode та GetTemperature наразі відсутня,**  
+> але ви можете додати ці функції самостійно.
 
-//for SmartAudio mode
+Перегляньте масиви **powers** і **freqs** у *VTXControl.cpp*  
+та за потреби відкоригуйте їх під свій передавач.
 
+## Приклад найпростішого створення інстансу
+
+<details>
+<summary>SmartAudio</summary>
+
+```cpp
 VTXControl* vtx;
-
 vtx = new VTXControl(VTXMode::SmartAudio, 53, 500, false);
+```
+</details>
 
-or
+<details>
+<summary>Tramp</summary>
 
-//for Tramp mode
-
+```cpp
 VTXControl* vtx;
-
 vtx = new VTXControl(VTXMode::Tramp, 53, 500, false);
+```
+</details>
 
-Sorry there is no support or help with this code, use it on your own.
+---
 
-NB: The main problem of interacting VTXControl with different VTXs is in implementation difference of SmartAudio/Tramp protocols. In other words, as BetaFlight/ArduPilot authors said, "because of poor implementation" of SmartAudio/Tramp by VTX manufacturers. So please use VTX_Test project to diagnose your own VTX - send commands, analyze responses, try different baudrates, try to add zero or not bytes to the end/start of standard frames/packets, ignore or not crc to achieve correct results with your own VTX.
+### Примітка
 
-**NB1: To VTX owners with >800mW power, SmartAudio v1 or v2.1 protocol: you can use following lifehack to create/modify table of powers (coded powers, dBm's): just set different levels of power on your VTX by button and catch updateParameters command response from VTX by VTX_Test project to get coded power level or dBm value for the current level of power.**
+Головна проблема взаємодії VTXControl із різними передавачами полягає у різних (іноді некоректних) реалізаціях SmartAudio/Tramp виробниками VTX.  
+Скористайтесь проєктом **VTX_Test** для діагностики: надсилайте команди, аналізуйте відповіді, експериментуйте з бітрейтом, перевіряйте наявність/відсутність нульових байтів на початку чи в кінці пакетів, ігноруйте або враховуйте CRC, щоб досягти коректної роботи з власним VTX.
+
+#### Примітка 1
+Для власників VTX із потужністю > 800 мВт та протоколом SmartAudio v1 чи v2.1:  
+можете створити/відкоригувати таблицю потужностей (**coded powers**, dBm) так:  
+установіть різні рівні потужності кнопкою на VTX, а потім перехопіть відповідь `updateParameters` у **VTX_Test**, щоб дізнатися код потужності або значення dBm для поточного режиму.
+
+> **Підтримка та допомога не надаються.**  
+> Використовуйте код на власний ризик.

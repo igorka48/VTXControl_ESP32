@@ -1,59 +1,10 @@
 #include <Arduino.h>
 #include <VTXControl.h>
-#include <SoftwareSerialWithHalfDuplex.h>
 
 VTXControl* vtx;
 bool vtx_updated = false;
 
-void setup()
-{
-  Serial.begin(115200);//
-  //create VTXCOntrol in SmartAudio/Tramp protocol mode, 
-  //on 53 port, with response time(awaiting for response) 1400ms, without smart-bauding(find/choose appropriate baudrate when VTX turns to be responsible on queries)
-  
-  //Urgent comment for SoftwareSerialWithHalfDuplex:
-  //The pin should support change interrupts :
-  //-On the Mega and Mega 2560 only the following can be used for RX : 10, 11, 12, 13, 14, 15, 50, 51, 52, 53, A8(62), A9(63), A10(64), A11(65), A12(66), A13(67), A14(68), A15(69).
-  //-On the Leonardo and Micro only the following can be used for RX : 8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
 
-  //vtx = new VTXControl(VTXMode::SmartAudio, 53, 1400, false);
-  vtx = new VTXControl(VTXMode::Tramp, 53, 500, false);
-  vtx->waitForInMs(1000);
-}
-void loop()
-{
-  if (!vtx_updated)
-  {
-    Serial.println(F("-------------------------------------"));
-    //for robo - here we refresh parameters of VTX
-    if (vtx->updateParameters())
-    {
-      vtx_updated = true;//succesfully updated
-      PrintSettings();
-      Serial.println(F("--Set Channel-------------------------------"));
-      if (vtx->setChannel(13))
-      {
-        Serial.println(F("Channel succesfully set"));
-      }
-      Serial.println(F("--Set Power-------------------------------"));
-      if (vtx->setPower(0))
-      {
-        Serial.println(F("Power succesfully set"));
-      }
-      if (vtx->updateParameters())
-      {
-        Serial.println(F("----------New parameters------"));
-      PrintSettings();
-      }
-    }
-    else
-    {
-      PrintErrors();
-    }
-    vtx->clearErrors();
-    vtx->flush();
-  }
-}
 void PrintSettings()
 {
   Serial.println("Current Power Level:" + (String)vtx->getPowerLevel());
@@ -62,7 +13,7 @@ void PrintSettings()
 }
 void PrintErrors()
 {
-  VTXErrors errs = vtx->getErrors();
+  int errs = vtx->getErrors();
 
   if (errs == VTXErrors::vtxNoErrors)
     Serial.println(F("VTX Errors: NoErrors"));
@@ -118,5 +69,55 @@ void waitForInMs(unsigned int ms)
   for (int i = 0; i < reminder_ms; i++)
   {
     delayMicroseconds(1000);
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);//
+  //create VTXCOntrol in SmartAudio/Tramp protocol mode, 
+  //on 53 port, with response time(awaiting for response) 1400ms, without smart-bauding(find/choose appropriate baudrate when VTX turns to be responsible on queries)
+  
+  //Urgent comment for SoftwareSerialWithHalfDuplex:
+  //The pin should support change interrupts :
+  //-On the Mega and Mega 2560 only the following can be used for RX : 10, 11, 12, 13, 14, 15, 50, 51, 52, 53, A8(62), A9(63), A10(64), A11(65), A12(66), A13(67), A14(68), A15(69).
+  //-On the Leonardo and Micro only the following can be used for RX : 8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
+
+  //vtx = new VTXControl(VTXMode::SmartAudio, 53, 1400, false);
+  vtx = new VTXControl(VTXMode::Tramp, 53, 500, false);
+  vtx->waitForInMs(1000);
+}
+void loop()
+{
+  if (!vtx_updated)
+  {
+    Serial.println(F("-------------------------------------"));
+    //for robo - here we refresh parameters of VTX
+    if (vtx->updateParameters())
+    {
+      vtx_updated = true;//succesfully updated
+      PrintSettings();
+      Serial.println(F("--Set Channel-------------------------------"));
+      if (vtx->setChannel(13))
+      {
+        Serial.println(F("Channel succesfully set"));
+      }
+      Serial.println(F("--Set Power-------------------------------"));
+      if (vtx->setPower(0))
+      {
+        Serial.println(F("Power succesfully set"));
+      }
+      if (vtx->updateParameters())
+      {
+        Serial.println(F("----------New parameters------"));
+      PrintSettings();
+      }
+    }
+    else
+    {
+      PrintErrors();
+    }
+    vtx->clearErrors();
+    vtx->flush();
   }
 }
